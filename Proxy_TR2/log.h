@@ -11,11 +11,7 @@ namespace Ui {
 class Logger;
 }
 
-/**
- * @brief The Logger class
- *
- * This is a Singleton, to exibe logger dialog, and have static functions to
- * handle with requisitions of print in logger, that can be used in every where
+/*Isso é um singleton que exibe o logger dialog e tem funções para lidar com requisiçõs de printar o logger
  */
 class Logger : public QDialog
 {
@@ -23,9 +19,7 @@ class Logger : public QDialog
 
 public:
     /*!
-     * \brief The msg_type enum
-     *
-     * kind of messages, control context and color
+     mensagens
      */
     enum msg_type{
         SUCCESS,             /**< Everything works fine */
@@ -35,81 +29,53 @@ public:
     };
 
     /**
-     * @brief Logger
-     *
-     * Instantiate a object, and set ui of QT
-     * @param parent parent that create a logger dialog
+    Instância objeto e seta a UI do Qt
      */
     explicit Logger(QWidget *parent = nullptr);
 
     /**
-     * Set pointer of singleton to null
+     * Seta ponteiro do singleton para null
      */
     ~Logger();
 
-    /**
-     * @brief get_instance
-     * Returna an instance of Singleton logger
-     *
-     * @param parent parent that create a logger dialog
-     * @return Return a Singleton of logger
+    /*
+     * Retorna uma instancia do Singleton logger
      */
     static Logger* get_instance(QWidget *parent);
 
     /**
-     * @brief show_window
-     * Open logger dialog, close is implemented in logger window
+     * Abre logger dialog
      */
     static void show_window();
 
-    /**
-     * @brief write
-     * Static function to send a signal to write something in logger dialog,
-     * the text is interpreted as html, so use <br> instead /n
-     *
-     * @param type kind o message, define color and semantic
-     * @param context text exibed between brackets, to show the context
-     * @param msg the message to be displayed
+    /*
+     Função q manda sinal para escrever no logger dialog, obs: texto é html
      */
     static void write(msg_type type, const QString &context, const QString &msg);
 
 signals:
     /**
-     * @brief write_log
-     * Signal to write something in logger dialog
-     *
-     * @param type kind of message
-     * @param context text exibed between brackts, to show the context
-     * @param msg the message to be displayed
+     Sinaliza para escrever algo no logger dialogue
      */
     void write_log(Logger::msg_type type, const QString &context, const QString &msg);
 
 private slots:
     /**
-     * @brief on_clearButton_clicked
-     * Clean the log
+    Limpa log
      */
     void on_clearButton_clicked();
 
     /**
-     * @brief on_closeButton_clicked
-     * Close dialog of logger
+     Fecha dialog of logger
      */
     void on_closeButton_clicked();
 
     /**
-     * @brief on_write
-     * At received the signal to write something,
-     * this will handle the message writing in dialog screen
-     *
-     * @param type kind of message
-     * @param context text exibed between brackts, to show the context
-     * @param msg the message to be displayed
+     Escreve ao receber sinal, lida com a escrita na tela de diálogo
      */
     void on_write(Logger::msg_type type, const QString &context, const QString &msg);
 
     /**
-     * @brief closeEvent
      * Override the close event button (x), to not close the dialog,
      * only hide
      *
@@ -120,9 +86,8 @@ private slots:
 private:
     Ui::Logger *ui;
 
-    /*!
-     * \brief instance
-     * Instance of Singleton Logger
+    /*
+     * Instancia do Singleton Logger
      */
     static Logger *instance;
 };
