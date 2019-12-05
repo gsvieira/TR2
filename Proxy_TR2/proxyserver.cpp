@@ -14,7 +14,7 @@ HttpParser* ProxyServer::response_text;
 HttpParser* ProxyServer::request_text;
 HttpParser* ProxyServer::last_request;
 
-/* Proxy Server methods */
+/* Proxy methods */
 
 ProxyServer::ProxyServer()
 {
@@ -26,13 +26,13 @@ ProxyServer::~ProxyServer()
 {
     instance = nullptr;
 
-    // Verify if finalized server was already notified and handled, if not do it
+    // Vertifica se já lidou com o servidor finalizado e finaliza caso não
     if(status != FINALIZED_SERVER){
         change_status_to(FINALIZE_SERVER);
         handler_status();
     }
 
-    // Send to QThread the intention of quit and wait until run ends
+    // Envia para QThread a intenção de sair e espera
     this->quit();
     this->wait();
 }
@@ -62,14 +62,14 @@ void ProxyServer::stopServer()
 }
 
 
-/* Server Handler functions */
+/* Funções que lidam com o servidor */
 
 void ProxyServer::initialize_proxy_server()
 {
-    // Create a socket for proxy server and force bind with port_number
+    // Cria o socket para o proxy e prende-o a porta
     server_connection = new Connection(port_number);
 
-    // Verify if connection of proxy saver is working
+    // checa se a conexão do proxy saver funciona
     if(server_connection->get_connection_error() != Connection::SUCCESS){
     }
 
@@ -78,10 +78,10 @@ void ProxyServer::initialize_proxy_server()
 
 void ProxyServer::finalize_proxy_server()
 {
-    // Delete proxy server socket
+    // Deleta o socket do proxy
     delete server_connection;
 
-    // Verify if get no errors
+    // Checa erross
     if(server_connection->get_connection_error() != Connection::SUCCESS){
     }
 
@@ -90,7 +90,7 @@ void ProxyServer::finalize_proxy_server()
 
 void ProxyServer::get_request()
 {
-    // Wait in a blocking call until browser request something
+    // espera o cliente pedir algo
     request_text = server_connection->listen_browser();
     last_request = new HttpParser(*request_text);
 
@@ -100,7 +100,7 @@ void ProxyServer::get_request()
 
 void ProxyServer::send_request_to_server()
 {
-    // wait until GUI set the request_text variable
+    //espera GUI setar request_text 
     while(request_text == nullptr){
         usleep(1);
     }
@@ -110,25 +110,24 @@ void ProxyServer::send_request_to_server()
     char *host;
     uint16_t port;
 
-    // Gets the host name in header of message sended by browser or edited by user
+    // Pega o nome do host no cabeçalho
     host = request_text->get_host();
 
-    // Gets the host port in header of message
+    // Pega a porta do host no cabeçalho
     port = request_text->get_port();
 
 
-    // Sends to Host (external server) the request_text (message sended by browser or edited by user)
+    // Rnvia o request_text para servidor externo
     response_text = server_connection->send_to_server(host, port, request_text);
 
-    // If host is not present notify
-    // TODO - fazer isso daqui direito
+    
     if(server_connection->get_connection_error() == Connection::NO_SUCH_HOST){
         char no_host[] = "Host not found, in request header or you don't have connection with internet!";
         response_text = new HttpParser();
         response_text->set_body(no_host, strlen(no_host));
     }
 
-    // Delete the request received, to handle with future requisitions
+    // Deleta a requisição recebida para lidar com requisições futuras
     delete request_text;
     request_text = nullptr;
 
@@ -139,15 +138,15 @@ void ProxyServer::send_request_to_server()
 
 void ProxyServer::send_response_to_browser()
 {
-    // Wait until GUI set the response_text variable
+    // espera GUI setar response_text
     while(response_text == nullptr){
         usleep(1);
     }
 
-    // Send to browser the response of Host or response edited by user
+    // envia resposta para cliente
     server_connection->send_to_browser(response_text);
 
-    // Delete the response to handle with future responses
+    // Deleta resposta para cuidar das próximas respostas
     delete response_text;
     response_text = nullptr;
 
@@ -210,7 +209,7 @@ void ProxyServer::wait_user_action()
 {
     Logger::write(Logger::INFO, "Proxy Server", "Waiting for user command<br>");
 
-    // Spend some time waiting for user action at GUI
+    // espera ações na GUI
     while(status == WAIT_USER_COMMAND && is_running){
         usleep(1);
     }
@@ -218,7 +217,7 @@ void ProxyServer::wait_user_action()
 
 void ProxyServer::wait_GUI_read_task()
 {
-    // Spend some time waiting for GUI read the actual task
+    // esperar GUI ler a tarefa
     while(actual_task != nullptr && is_running){
         usleep(1);
     }
@@ -226,100 +225,80 @@ void ProxyServer::wait_GUI_read_task()
 
 void ProxyServer::handler_status()
 {
-    // Notify to GUI the new status
+    // Notifica GUI sobre status
     notify_new_status(status);
 
     // Handle with actual status
     switch (status) {
 
-    /* At waiting for user command, spend some time wating for user interaction */
     case WAIT_USER_COMMAND:
         wait_user_action();
         break;
 
-    /* At state of wait request, get the request of browser and set next status on flow */
     case WAIT_REQUEST:
         next_status = SEND_TO_SERVER;
         get_request();
         break;
 
-    /* At state send to browser, send to browser the response and set next status on flow */
     case SEND_TO_BROWSER:
         next_status = WAIT_REQUEST;
         send_response_to_browser();
         break;
 
-    /* At state of send to server, send the request to external server and set next status on flow */
     case SEND_TO_SERVER:
         next_status = SEND_TO_BROWSER;
         send_request_to_server();
         break;
 
-    /* At requisited a dump, create a new task of type dump, pass the url to be dumped and runs the task in other Thread */
     case START_DUMP:
         dump_request();
         break;
 
-    /* At requisited a spider, create a new task of type spider, pass the url to be spied and runs the task in other Thread */
     case START_SPIDER:
         spider_request();
         break;
 
-    /* At requisited a dump, create a new task of type dump, pass the url to be dumped and runs the task in other Thread */
     case INITIALIZE_SERVER:
         next_status = WAIT_REQUEST;
         initialize_proxy_server();
         break;
 
-    /* At finalize server state, delete de connection object, closing the socket */
     case FINALIZE_SERVER:
         next_status = FINALIZE_SERVER_ERROR;
         finalize_proxy_server();
         break;
 
-    /* Cases that handle with errors status */
-        /* Not implemented yet */
-
+    // não implementado
     case INITIALIZE_SERVER_ERROR:
-        // TODO - função de cagaço
         break;
     case REQUEST_ERROR:
-        // TODO - função de cagaço
         break;
     case SEND_TO_BROWSER_ERROR:
-        // TODO - função de cagaço
         break;
     case SERVER_RESPONSE_ERROR:
-        // TODO - função de cagaço
         break;
     case DUMP_ERROR:
-        // TODO - função de cagaço
         break;
     case SPIDER_ERROR:
-        // TODO - função de cagaço
         break;
     case FINALIZE_SERVER_ERROR:
-        // TODO - função de cagaço
         break;
     case UNKNOWN_ERROR:
-        // TODO - função de cagaço
         break;
     default:
-        // TODO - função de cagaço supremo
         break;
     }
 }
 
 void ProxyServer::handle_finished_task(SpiderDump *task)
 {
-    // Wait gui read actual task, if there was a task before not handled
     wait_GUI_read_task();
 
-    // Set the actual task and decrements the number of running tasks
+    // Seta task atual e decrementa o número de tasks que estão rodando
     actual_task = task;
     running_tasks--;
 
-    // Verify tipy of task (dump or spider) and notify GUI
+   
     if(task->getType() == SpiderDump::DUMP_TASK){
         if(task->getReturn_error() == SpiderDump::SUCCESS){
             notify_new_status(FINISHED_DUMP);
@@ -330,10 +309,10 @@ void ProxyServer::handle_finished_task(SpiderDump *task)
         }
     }
 
-    // Wait for GUI read the actual task
+    // espera GUI ler a task
     wait_GUI_read_task();
 
-    // And delete the task finished
+    // deleta task finalizada
     task->deleteLater();
 }
 
@@ -352,7 +331,7 @@ void ProxyServer::notify_new_status(server_status new_status){
 
 ProxyServer* ProxyServer::get_instance(int port)
 {
-    // Verify if already have one instance of the Singleton Proxy Server
+    // Verifica dse já tem instancia Singleton Proxy 
     if(instance == nullptr){
         instance = new ProxyServer();
         port_number = port;
@@ -410,13 +389,13 @@ SpiderDump* ProxyServer::readActual_task()
 
 HttpParser* ProxyServer::read_response()
 {
-    // Creat a buffer to save the response text
+    // cria buffer e salva texto de resposta
     HttpParser* buffer;
 
-    // Copy the response to buffer
+    // copia resposta pro buffer 
     buffer = response_text;
 
-    // Clean response_text variable to be used in align of GUI and Proxy server threads
+    // limpa response_text para ser usada nos threads da GUI e do Proxy
     response_text = nullptr;
 
     return buffer;
@@ -424,25 +403,19 @@ HttpParser* ProxyServer::read_response()
 
 HttpParser* ProxyServer::read_request()
 {
-    // Creat a buffer to save the request text
+    // cria buffer e salva texto de resposta
     HttpParser* buffer;
 
-    // Copy the response to buffer
+    // copia resposta pro buffer 
     buffer = request_text;
 
-    // Clean request_text variable to be used in align of GUI and Proxy server threads
+    // limpa response_text para ser usada nos threads da GUI e do Proxy
     request_text = nullptr;
 
     return buffer;
 }
 
-// Se enviado para view o conteudo completo(binário), e permitido a edição,
-// arquivos codificados (compactados etc), seram corompidos pela formatação usando '\0'
-//
-// TODO op1 -   definir campo de header e de conteudo na view
-//              permitir editar conteudo somente se não for codificado
-// TODO op2 -   lidar com as codificações dos conteudos, decodificando assim que recebido
-//              e exibindo decodificado, codificando novamente na hora de enviar
+
 void ProxyServer::set_request_text(HttpParser *text)
 {
     request_text = text;
