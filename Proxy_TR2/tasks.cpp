@@ -14,9 +14,7 @@ TaskResults::TaskResults(QWidget *parent,
 
     if(tree == nullptr && files == nullptr) {
         Logger::write(Logger::DANGER, "TaskResults", "Tree and Files are NULL, cannot show results!");
-        //TODO - pode escrever aqui mesmo cubo
-        // Este cara esta sendo istanciado na proxymanager.cpp
-        // funções: handle_finished_spider() e handle_finished_dump()
+        
         this->setWindowTitle("Error in Task");
         ui->textField->setPlainText("Tree and Files are NULL, cannot show results!");
     } else {
@@ -53,12 +51,3 @@ void TaskResults::on_pushButton_clicked()
 {
     this->close();
 }
-
-//void TaskResults::recursive_print(std::vector<SpiderDump::spider_element> *tree, QString link)
-//{
-
-//    if(link[0] != '/') {
-//        ui->textField->append("|--- "+link);
-//        return;
-//    }
-//}
