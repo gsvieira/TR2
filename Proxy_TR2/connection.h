@@ -16,22 +16,15 @@
 #include "logger.h"
 #include "httpparser.h"
 
-/*!
- * \brief The Connection class
- *
- * This class implement network connection using TCP,
- * creating a socket to proxy server, and handling with request to servers
- * that works over HTTP.
- * NOTE: this not can handle with HTTPS, only HTTP protocol.
+/*
+Usa TCP para implementar conexão, cria socket pro proxy e lida com requisições HTTP.
  */
 class Connection
 {
 public:
 
-    /*!
-     * \brief The errors enum
-     *
-     * Enum listing connections errors
+    /*
+    lista de erros
      */
     enum errors{
         SUCCESS,                        /**< Everything works fine */
@@ -50,112 +43,80 @@ public:
 
 
     /**
-     * @brief Connection
-     * Create Connection object, create a socket for proxy server
-     * config socket, set address and force socket to bind with given port
-     *
-     * @param port proxy server port
+     Cria, configura, põe endereço e une à porta, o socket pro proxy
      */
     Connection(int port);
 
     /**
-     * @brief ~Connection
-     * Close proxy server socket
+     fecha socket do proxy
      */
     ~Connection();
 
 
     /**
-     * @brief listen_browser
-     * Wait until client (Browser) send a request,
-     * read the request and save in a struct message
-     *
-     * @return (struct message*) return the request sended by browser
+     espera requisição do cliente, lê requisição e salva na struct menssage
      */
     HttpParser* listen_browser();
 
-    /**
-     * @brief send_to_server
-     * Create a new socket, so handle with external server,
-     * set the address, connect to server, and send request (buff_send),
-     * saving the response in a struct message
-     *
-     * @param host_server name of host server (e.g. struct.unb.br)
-     * @param port port of the server (e.g. 80)
-     * @param buff_send message to send to external server requesting something
-     * @return (struct message*) return the response sended by server
+    /*
+     cria socket para lidar com servidor externo, põe endereço, conecta com o servidor e envia requisição
      */
     HttpParser* send_to_server(const char* host_server, uint16_t port, HttpParser* buff_send);
 
 
-    /**
-     * @brief send_to_browser
-     * Send to client (browser) the response,
-     * closing the socket created in @ref listen_browser() to communicate with browser
-     *
-     * @param buff_send message to be send to server
+    /*
+     Envia resposta pro cliente e fecha o socket criado em listen_browser()
      */
     void send_to_browser(HttpParser* buff_send);
 
 
-    /**
-     * @brief get_connection_error
-     * Return the actual connection error seted
-     *
-     * @return (enum errors)
+    /*
+     retorna erro de conexão
      */
     errors get_connection_error();
 
 private:
     /*
-     * Atributtes
+     * Atributos
      */
 
-    /*!
-     * \brief port_n
-     * Number of proxy server port
+    /*
+     * número da porta do proxy
      */
     uint16_t port_n;
 
     /*!
-     * \brief server_fd
-     * Socket of proxy server so listen clients
+     socket do proxy para ouviros clientes
      */
     int server_fd;
 
-    /*!
-     * \brief browser_socket
-     * Socket of client (browser)
+    /*
+    socket do client
      */
     int browser_socket;
 
-    /*!
-     * \brief address
-     * Address configurations of proxy server
+    /*configuração do endereço do proxy
      */
     struct sockaddr_in address;
 
-    /*!
-     * \brief addrlen
-     * Size of Address
+    /*
+     tamanho do endereço
      */
     int addrlen;
 
-    /*!
-     * \brief opt
+    /*
      * configuração de tamanho
      */
     int opt = 1;
 
-    /*!
-     * \brief connection_error
+    /*
      * Estado de erro da conexão
      */
     errors connection_error;
 
 
     /*
-     * Functions to manipualte data and socket
+     * Funções para manipular dados e os sockets
      */
 
     /**
