@@ -20,7 +20,6 @@ bool HttpParser::set_by_text(char *text, unsigned long text_size)
 
     return (header_ret and body_ret);
 
-    //TODO - resolver codificação ou não e rever questão do '/0'
 }
 
 bool HttpParser::set_header(char *header, unsigned long header_size)
@@ -45,7 +44,6 @@ bool HttpParser::set_header(char *header, unsigned long header_size)
 
     return true;
 
-    //TODO - Rever questão do '/0'
 }
 
 bool HttpParser::set_body(char *body, unsigned long body_size)
@@ -164,7 +162,7 @@ unsigned long HttpParser::get_body_size()
 }
 
 
-/* Gets for especific informations */
+/* Gets para informação específica */
 
 u_int16_t HttpParser::get_port()
 {
