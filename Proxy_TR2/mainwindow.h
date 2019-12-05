@@ -11,9 +11,7 @@ class MainWindow;
 }
 
 /**
- * @brief The MainWindow class
- * Show the window that can configure the proxy server port,
- * and start proxy server
+ Mostra janela de configuração da porta do proxy e inicia o proxy
  */
 class MainWindow : public QMainWindow
 {
@@ -21,11 +19,7 @@ class MainWindow : public QMainWindow
 
 public:
     /**
-     * @brief MainWindow
-     * return the QWindow to configurate proxy server port,
-     * and start proxy server
-     *
-     * @param parent parent that creat this widget
+     * return QWindow para configurar porta do proxu e inicia ele
      */
     explicit MainWindow(QWidget *parent = nullptr);
 
@@ -33,17 +27,14 @@ public:
 
 private slots:
     /**
-     * @brief back
-     * Treat requisition of back:
-     * Close actual proxy server, manager window and logger,
-     * and return to initial window
+     Trata requisições "voltar"
+    fecha o proxy, manager window e logger, e retorna para a janela inicial window
      */
     void back();
 
     /**
-     * @brief on_pushButton_clicked
-     * Treat requisiton of start proxy server:
-     * Getting an instance, and starting proxy server, and open the manage window
+     lida com a requisição "inicia" proxy
+     * pega a instancia, inicia proxy , e abre a janela (manage window)
      */
     void on_pushButton_clicked();
 
@@ -51,20 +42,18 @@ private:
     Ui::MainWindow *ui;
 
     /*!
-     * \brief proxy_manager_window
-     * Qwindow that handle with proxy management
+
+     * Qwindow lida com o proxy
      */
     ProxyManager *proxy_manager_window;
 
-    /*!
-     * \brief proxy_server
-     * The proxy server, that handle with requisitions and responses
+    /*
+     * O proxy, lida com requisições e respostas (coisa de proxy)
      */
     ProxyServer  *proxy_server;
 
     /*!
-     * \brief logger_window
-     * Logger dialog, that show in screen all logs written
+     * Logger dialog, mostra todos os logs escritos
      */
     Logger *logger_window;
 };
