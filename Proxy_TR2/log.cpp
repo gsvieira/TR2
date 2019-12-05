@@ -18,14 +18,14 @@ Logger::~Logger()
 
 Logger* Logger::get_instance(QWidget *parent)
 {
-    // Verify if already have one instance
+    // Verifica se já tem instância
     if(instance == nullptr){
         instance = new Logger(parent);
     }else{
         return nullptr;
     }
 
-    // Set window name
+    // Dá nome a janela
     instance->setWindowTitle("System Log");
 
     // Regist enum in QT template to be used in signals and slots
@@ -44,7 +44,7 @@ void Logger::show_window()
 
 void Logger::write(Logger::msg_type type, const QString &context, const QString &msg)
 {
-    // Verify if have one instance of singleton, and send a signal to object to write
+    // Verifica se já tem uma instância do singleton e manda um sinal para o objeto escrever
     if(instance != nullptr){
         emit instance->write_log(type, context, msg);
     }
